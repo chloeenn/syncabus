@@ -1,15 +1,31 @@
-"use client"
-import { useDropzone } from "react-dropzone"
+"use client";
+
+import { useDropzone } from "react-dropzone";
+import { FileUp } from "lucide-react";
 
 export default function FileUpload() {
-    const {getRootProps, getInputProps} = useDropzone()
-    return(
-        <div>
-        <h1>file upload</h1>
-        <div {...getRootProps()}>
-           <input {...getInputProps()} />
-           <p>Drag and Drop</p>
+    const handleDrop = (acceptedFiles: File[]) => {
+        console.log(acceptedFiles);
+        //upload to aws s3
+    };
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop: handleDrop,
+        accept: { "application/pdf": [".pdf"] },
+        maxFiles: 1,
+    });
+
+    return (
+        <div
+            {...getRootProps()}
+            className="border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 transition-colors duration-300 text-white rounded-xl px-6 py-16 text-center shadow-lg cursor-pointer select-none"
+        >
+            <input {...getInputProps()} />
+            <FileUp className="w-10 h-10 mx-auto text-neutral-400 mb-4 transition-transform duration-300 group-hover:scale-105" />
+            <p className="text-lg font-medium text-neutral-100 mb-1">
+                Drag & Drop your PDF
+            </p>
+            <p className="text-sm text-neutral-500">or click to browse</p>
         </div>
-        </div>
-    )
+    );
 }
