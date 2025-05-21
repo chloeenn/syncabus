@@ -1,6 +1,7 @@
 "use client";
 import { useDropzone } from "react-dropzone";
 import { FileUp } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export default function FileUpload() {
     const handleDrop = async (acceptedFiles: File[]) => {
@@ -8,7 +9,7 @@ export default function FileUpload() {
         console.log(file);
         const formData = new FormData();
         formData.append("file", file);
-        //upload to aws s3
+        //Upload file to AWS S3
         const response = await fetch("/api/upload", {
             method: "POST",
             body: formData,
@@ -19,6 +20,8 @@ export default function FileUpload() {
         }
         const data = await response.json();
         console.log("File uploaded:", data.fileName, data.fileKey);
+        console.log(`File uri: ${encodeURIComponent(data.fileKey)}`)
+        redirect(`result/${encodeURIComponent(data.fileKey)}`)
     };
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({

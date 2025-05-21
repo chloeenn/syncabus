@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         }
         const command = new PutObjectCommand(input)
         await s3.send(command)
-        return NextResponse.json({ fileName }, { status: 200 });
+        return NextResponse.json({ fileName,fileKey }, { status: 200 });
     } catch (error) {
         console.error("Failed to upload file to S3:", error);
         return NextResponse.json({ error: "Failed to upload file to S3" }, { status: 500 });
