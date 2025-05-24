@@ -1,5 +1,3 @@
-// src/app/api/generateICS/route.ts (or wherever your Next.js API routes live)
-
 import { NextRequest, NextResponse } from "next/server";
 import { generateICSFile } from "@/lib/generateICS";
 

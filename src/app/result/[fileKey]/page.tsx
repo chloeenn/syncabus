@@ -16,26 +16,21 @@ export default function ResultPage() {
       if (!fileKey) return;
 
       try {
-        // Get PDF URL
         const retrieveRes = await fetch(`/api/retrieve?key=${fileKey}`);
         const retrieveData = await retrieveRes.json();
         setFileURL(retrieveData.url);
 
-        // Parse PDF to text
         const parseRes = await fetch(`/api/parse?key=${fileKey}`);
         const parsed = await parseRes.json();
 
-        // Extract events from text
         const extractRes = await fetch("/api/extract", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text: parsed.text }),
         });
         const { events } = await extractRes.json();
-
         setExtractedEvents(events.length ? events : null);
 
-        // Generate ICS content from events (call server API)
         if (events.length) {
           const icsRes = await fetch("/api/calendar", {
             method: "POST",
@@ -43,9 +38,7 @@ export default function ResultPage() {
             body: JSON.stringify({ events }),
           });
           const icsJson = await icsRes.json();
-
-          if (icsJson.ics) setIcsContent(icsJson.ics);
-          else setIcsContent(null);
+          setIcsContent(icsJson.ics || null);
         } else {
           setIcsContent(null);
         }
@@ -59,66 +52,86 @@ export default function ResultPage() {
     loadAndProcess();
   }, [fileKey]);
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-black text-white">
-        <p className="text-xl font-semibold">Loading file...</p>
+      <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
+        <div className="w-10 h-10 border-4 border-white border-b-transparent rounded-full animate-spin" />
+        <p className="mt-6 text-base text-neutral-400">Processing your file…</p>
       </div>
     );
+  }
 
-  if (error)
+  if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-black text-red-500">
-        <p className="text-xl font-semibold">Error: {error}</p>
+      <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
+        <p className="text-red-500 text-lg font-medium">Error: {error}</p>
       </div>
     );
+  }
+
   return (
-    <main className=" bg-black text-white p-8 flex flex-row max-w-[1200px] mx-auto gap-10">
-  
-      <section className="flex-1 rounded-lg border border-gray-700 shadow-lg overflow-hidden">
-        <iframe
-          src={fileURL}
-          className="w-full h-[calc(100vh-4rem)]"
-          title="PDF preview"
-        />
-      </section>
+   <main className="bg-black text-white min-h-screen px-6 py-12 md:px-12">
+  <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12">
+    <section className="flex-1 bg-none rounded-2xl overflow-hidden border border-neutral-800 shadow-lg">
+      <iframe
+        src={fileURL}
+        title="PDF Preview"
+        className="w-full h-[650px] rounded-t-2xl"
+      />
+    </section>
 
-     
-      <section className="flex-[0.6] flex flex-col bg-gray-800 rounded-xl p-6 shadow-md max-h-[calc(100vh-4rem)] overflow-y-auto">
-        <h2 className="text-3xl font-semibold mb-6 border-b border-gray-700 pb-2">
-          Extracted Events
-        </h2>
-
-        {extractedEvents && extractedEvents.length ? (
-          <ul className="space-y-4 mb-6">
-            {extractedEvents.map((event, i) => (
-              <li
-                key={i}
-                className="p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors cursor-default select-none"
-              >
-                <p className="text-lg font-semibold">{event.title}</p>
-                <p className="text-sm text-gray-300">
-                  {event.date} — {event.startTime} to {event.endTime}
-                  {event.location ? ` @ ${event.location}` : ""}
-                </p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="italic text-gray-400">No events found.</p>
-        )}
-
-       
+    <section className="flex-1 max-h-[650px] overflow-y-auto  border border-neutral-800 shadow-lg rounded-2xl px-6 py-5">
+      <div className="mb-4 flex justify-between items-center">
+        <h2 className="text-2xl font-semibold text-white">Assessments</h2>
         {icsContent && (
           <a
             href={`data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`}
             download="events.ics"
-            className="mt-auto inline-block bg-black text-white font-semibold py-3 px-6 rounded-lg text-center transition-colors select-none"
+            className="px-4 py-2 text-sm font-medium bg-white text-black rounded-md hover:bg-neutral-100 transition"
           >
-            Download .ics Calendar File
+            Download .ics
           </a>
         )}
-      </section>
-    </main>
+      </div>
+
+      {extractedEvents && extractedEvents.length > 0 ? (
+        <div className="space-y-4">
+          {extractedEvents.map((event, index) => (
+            <div
+              key={index}
+              className="border border-neutral-700 rounded-xl px-5 py-4 bg-[#0e0e0e] hover:border-neutral-600 transition"
+            >
+              <div className="flex justify-between items-start mb-1">
+                <h3 className="text-lg font-semibold text-white leading-snug">
+                  {event.title || "Untitled Event"}
+                </h3>
+              </div>
+              <div className="text-sm text-neutral-400 space-y-1">
+                {event.date && (
+                  <p>
+                    <span className="text-white font-medium">Date:</span> {event.date}
+                  </p>
+                )}
+                {event.startTime && event.endTime && (
+                  <p>
+                    <span className="text-white font-medium">Time:</span> {event.startTime} – {event.endTime}
+                  </p>
+                )}
+                {event.location && (
+                  <p>
+                    <span className="text-white font-medium">Location:</span> {event.location}
+                  </p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-neutral-500">No events were extracted from your file.</p>
+      )}
+    </section>
+  </div>
+</main>
+
   );
 }
