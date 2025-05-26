@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-
+import { ExtractedEvent } from "@/lib/types";
 export default function ResultPage() {
   const { fileKey } = useParams();
   const [fileURL, setFileURL] = useState<string>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [extractedEvents, setExtractedEvents] = useState<any[] | null>(null);
+  const [extractedEvents, setExtractedEvents] = useState<ExtractedEvent[] | null>(null);
   const [icsContent, setIcsContent] = useState<string | null>(null);
 
   useEffect(() => {
@@ -42,8 +42,8 @@ export default function ResultPage() {
         } else {
           setIcsContent(null);
         }
-      } catch (err: any) {
-        setError(err.message || "Unknown error");
+      } catch (error: unknown) {
+        setError(typeof error === "string" ? error : "Unknown error");
       } finally {
         setLoading(false);
       }
@@ -70,68 +70,68 @@ export default function ResultPage() {
   }
 
   return (
-   <main className="bg-black text-white min-h-screen px-6 py-12 md:px-12">
-  <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12">
-    <section className="flex-1 bg-none rounded-2xl overflow-hidden border border-neutral-800 shadow-lg">
-      <iframe
-        src={fileURL}
-        title="PDF Preview"
-        className="w-full h-[650px] rounded-t-2xl"
-      />
-    </section>
+    <main className="bg-black text-white min-h-screen px-6 py-12 md:px-12">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12">
+        <section className="flex-1 bg-none rounded-2xl overflow-hidden border border-neutral-800 shadow-lg">
+          <iframe
+            src={fileURL}
+            title="PDF Preview"
+            className="w-full h-[650px] rounded-t-2xl"
+          />
+        </section>
 
-    <section className="flex-1 max-h-[650px] overflow-y-auto  border border-neutral-800 shadow-lg rounded-2xl px-6 py-5">
-      <div className="mb-4 flex justify-between items-center">
-        <h2 className="text-2xl font-semibold text-white">Assessments</h2>
-        {icsContent && (
-          <a
-            href={`data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`}
-            download="events.ics"
-            className="px-4 py-2 text-sm font-medium bg-white text-black rounded-md hover:bg-neutral-100 transition"
-          >
-            Download .ics
-          </a>
-        )}
-      </div>
+        <section className="flex-1 max-h-[650px] overflow-y-auto  border border-neutral-800 shadow-lg rounded-2xl px-6 py-5">
+          <div className="mb-4 flex justify-between items-center">
+            <h2 className="text-2xl font-semibold text-white">Assessments</h2>
+            {icsContent && (
+              <a
+                href={`data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`}
+                download="events.ics"
+                className="px-4 py-2 text-sm font-medium bg-white text-black rounded-md hover:bg-neutral-100 transition"
+              >
+                Download .ics
+              </a>
+            )}
+          </div>
 
-      {extractedEvents && extractedEvents.length > 0 ? (
-        <div className="space-y-4">
-          {extractedEvents.map((event, index) => (
-            <div
-              key={index}
-              className="border border-neutral-700 rounded-xl px-5 py-4 bg-[#0e0e0e] hover:border-neutral-600 transition"
-            >
-              <div className="flex justify-between items-start mb-1">
-                <h3 className="text-lg font-semibold text-white leading-snug">
-                  {event.title || "Untitled Event"}
-                </h3>
-              </div>
-              <div className="text-sm text-neutral-400 space-y-1">
-                {event.date && (
-                  <p>
-                    <span className="text-white font-medium">Date:</span> {event.date}
-                  </p>
-                )}
-                {event.startTime && event.endTime && (
-                  <p>
-                    <span className="text-white font-medium">Time:</span> {event.startTime} – {event.endTime}
-                  </p>
-                )}
-                {event.location && (
-                  <p>
-                    <span className="text-white font-medium">Location:</span> {event.location}
-                  </p>
-                )}
-              </div>
+          {extractedEvents && extractedEvents.length > 0 ? (
+            <div className="space-y-4">
+              {extractedEvents.map((event, index) => (
+                <div
+                  key={index}
+                  className="border border-neutral-700 rounded-xl px-5 py-4 bg-[#0e0e0e] hover:border-neutral-600 transition"
+                >
+                  <div className="flex justify-between items-start mb-1">
+                    <h3 className="text-lg font-semibold text-white leading-snug">
+                      {event.title || "Untitled Event"}
+                    </h3>
+                  </div>
+                  <div className="text-sm text-neutral-400 space-y-1">
+                    {event.date && (
+                      <p>
+                        <span className="text-white font-medium">Date:</span> {event.date}
+                      </p>
+                    )}
+                    {event.startTime && event.endTime && (
+                      <p>
+                        <span className="text-white font-medium">Time:</span> {event.startTime} – {event.endTime}
+                      </p>
+                    )}
+                    {event.location && (
+                      <p>
+                        <span className="text-white font-medium">Location:</span> {event.location}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-sm text-neutral-500">No events were extracted from your file.</p>
-      )}
-    </section>
-  </div>
-</main>
+          ) : (
+            <p className="text-sm text-neutral-500">No events were extracted from your file.</p>
+          )}
+        </section>
+      </div>
+    </main>
 
   );
 }

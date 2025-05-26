@@ -24,7 +24,7 @@ export default function FileUpload() {
         redirect(`result/${encodeURIComponent(data.fileKey)}`)
     };
 
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    const { getRootProps, getInputProps } = useDropzone({
         onDrop: handleDrop,
         accept: { "application/pdf": [".pdf"] },
         maxFiles: 1,

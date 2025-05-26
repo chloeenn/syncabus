@@ -1,5 +1,5 @@
 // lib/s3.ts
-import { S3Client, GetObjectCommand, GetObjectCommandInput, GetObjectCommandOutput } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand, GetObjectCommandInput } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Readable } from "stream";
 export const s3 = new S3Client({
@@ -19,7 +19,7 @@ export async function downloadFromS3(key: string): Promise<Buffer> {
   const command = new GetObjectCommand(input);
   const response = await s3.send(command);
   const stream = response.Body as Readable;
-  const chunks : any[] = [];
+  const chunks : Buffer[] = [];
   for await(const chunk of stream){
     chunks.push(chunk);
   }
