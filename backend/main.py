@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import retrieve, parse_pdf, extract,calendar
+from app.api import retrieve, parse_pdf, extract,calendar,analyze
 
 app = FastAPI()
 
@@ -29,6 +29,7 @@ app.include_router(retrieve.router, prefix="/api")
 app.include_router(parse_pdf.router, prefix="/api")
 app.include_router(extract.router, prefix="/api")
 app.include_router(calendar.router, prefix="/api")
+app.include_router(analyze.router, prefix="/api")
 
 @app.get("/")
 async def root():

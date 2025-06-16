@@ -1,0 +1,41 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environment
+venv/
+.env
+.venv/
+ENV/
+env/
+
+# dotenv environment variables
+*.env
+
+# Pytest cache
+.pytest_cache/
+
+# SQLite database files
+*.sqlite3
+*.db
+
+# VS Code or other IDE settings
+.vscode/
+.idea/
+
+# Coverage reports
+htmlcov/
+.coverage
+
+# Mypy, Pyright
+.mypy_cache/
+.pyright/
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
