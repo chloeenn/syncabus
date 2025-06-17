@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { ExtractedEvent } from "@/lib/types";
 import Analysis from "@/components/Analysis";
 import { Calendar } from "lucide-react"; // Assuming lucide-react for icons
-
+import EventTable from "@/components/EventTable";
 export default function ResultPage() {
   const { fileKey } = useParams();
   const [fileURL, setFileURL] = useState<string>();
@@ -14,6 +14,19 @@ export default function ResultPage() {
   const [extractedEvents, setExtractedEvents] = useState<ExtractedEvent[] | null>(null);
   const [icsContent, setIcsContent] = useState<string | null>(null);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+  useEffect(() => {
+    const regenerateICS = async () => {
+      const res = await fetch(`${API_BASE_URL}/calendar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ events: extractedEvents }),
+      });
+      const text = await res.text();
+      setIcsContent(text);
+    };
+
+    if (extractedEvents && extractedEvents.length > 0) regenerateICS();
+  }, [extractedEvents]);
 
   useEffect(() => {
     const loadAndProcess = async () => {
@@ -78,6 +91,27 @@ export default function ResultPage() {
       </div>
     );
   }
+  const handleEventsUpdate = async (updatedEvents: ExtractedEvent[]) => {
+    const validEvents = updatedEvents.filter(
+      (e) => e.title && e.date && e.startTime && e.endTime
+    );
+
+    setExtractedEvents(validEvents);
+
+    if (validEvents.length === 0) {
+      setIcsContent(null);
+      return;
+    }
+
+    const icsRes = await fetch(`${API_BASE_URL}/calendar`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ events: validEvents }),
+    });
+    const icsText = await icsRes.text();
+    setIcsContent(icsText || null);
+  };
+
 
   return (
     <main className="bg-black text-white min-h-screen px-6 py-12 md:px-12">
@@ -114,49 +148,7 @@ export default function ResultPage() {
             )}
           </header>
 
-          <div className="mt-4 max-h-[580px] overflow-y-auto pr-2">
-            {extractedEvents && extractedEvents.length > 0 ? (
-              <div className="space-y-4">
-                {extractedEvents.map((event, index) => (
-                  <article
-                    key={index}
-                    className="border border-neutral-700 rounded-xl px-5 py-4 bg-[#0e0e0e] hover:border-neutral-600 transition animate-fade-in focus:outline-none focus:ring-2 focus:ring-neutral-500"
-                    tabIndex={0}
-                    role="region"
-                    aria-label={`Event: ${event.title || "Untitled Event"}`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-xl font-semibold text-white leading-snug truncate max-w-[80%]">
-                        {event.title || "Untitled Event"}
-                      </h3>
-                    </div>
-                    <div className="text-sm text-neutral-400 space-y-1">
-                      {event.date && (
-                        <p>
-                          <span className="text-white font-medium">Date:</span> {event.date}
-                        </p>
-                      )}
-                      {event.startTime && event.endTime && (
-                        <p>
-                          <span className="text-white font-medium">Time:</span> {event.startTime} –{" "}
-                          {event.endTime}
-                        </p>
-                      )}
-                      {event.location && (
-                        <p>
-                          <span className="text-white font-medium">Location:</span> {event.location}
-                        </p>
-                      )}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-neutral-500 text-center py-8">
-                No events were extracted from your file.
-              </p>
-            )}
-          </div>
+         <EventTable extractedEvents={extractedEvents || []} onUpdate={handleEventsUpdate} />
         </section>
 
         {extractedEvents && extractedEvents.length > 0 && (
