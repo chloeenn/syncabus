@@ -6,3 +6,4 @@ ics
 openai
 pymupdf
 SQLAlchemy
+pandas
