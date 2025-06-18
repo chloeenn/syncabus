@@ -11,16 +11,16 @@ export default function EventTable({ extractedEvents, onUpdate }: Props) {
         onUpdate(updated);
     };
 
-    const handleAddEvent = () => {
-        const newEvent: ExtractedEvent = {
-            title: "New Event",
-            date: "",
-            startTime: "",
-            endTime: "",
-            location: "",
-        };
-        onUpdate([...extractedEvents, newEvent]);
-    };
+    // const handleAddEvent = () => {
+    //     const newEvent: ExtractedEvent = {
+    //         title: "New Event",
+    //         date: "",
+    //         startTime: "",
+    //         endTime: "",
+    //         location: "",
+    //     };
+    //     onUpdate([...extractedEvents, newEvent]);
+    // };
 
     return (
         <div className="mt-4 max-h-[580px] overflow-y-auto pr-2 space-y-4">

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { ExtractedEvent } from "@/lib/types";
 import Analysis from "@/components/Analysis";
-import { Calendar } from "lucide-react"; // Assuming lucide-react for icons
+import { Calendar } from "lucide-react";
 import EventTable from "@/components/EventTable";
 export default function ResultPage() {
   const { fileKey } = useParams();
@@ -46,13 +46,21 @@ export default function ResultPage() {
           body: JSON.stringify({ text: parsed.text }),
         });
         const { events } = await extractRes.json();
-        setExtractedEvents(events.length ? events : null);
+        const cleanRes = await fetch(`${API_BASE_URL}/clean`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({events}),
+        });
+        const cleanedEvents = await cleanRes.json();
+        setExtractedEvents(cleanedEvents.length ? cleanedEvents : null);
+
+        // setExtractedEvents(events.length ? events : null);
 
         if (events.length) {
           const icsRes = await fetch(`${API_BASE_URL}/calendar`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ events }),
+            body: JSON.stringify({ cleanedEvents }),
           });
           const icsText = await icsRes.text();
           setIcsContent(icsText || null);
@@ -91,6 +99,7 @@ export default function ResultPage() {
       </div>
     );
   }
+
   const handleEventsUpdate = async (updatedEvents: ExtractedEvent[]) => {
     const validEvents = updatedEvents.filter(
       (e) => e.title && e.date && e.startTime && e.endTime
@@ -148,7 +157,7 @@ export default function ResultPage() {
             )}
           </header>
 
-         <EventTable extractedEvents={extractedEvents || []} onUpdate={handleEventsUpdate} />
+          <EventTable extractedEvents={extractedEvents || []} onUpdate={handleEventsUpdate} />
         </section>
 
         {extractedEvents && extractedEvents.length > 0 && (
