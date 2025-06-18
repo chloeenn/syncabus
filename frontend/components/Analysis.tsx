@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ExtractedEvent } from "@/lib/types";
-import { RefreshCw } from "lucide-react"; 
+import { RefreshCw } from "lucide-react";
+import Image from 'next/image';
 
 interface WeeklyDeadline {
   week: number;
@@ -20,7 +21,7 @@ export default function Analysis({ events, apiBaseUrl }: AnalysisProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAnalysis = async () => {
+  const fetchAnalysis = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -33,19 +34,18 @@ export default function Analysis({ events, apiBaseUrl }: AnalysisProps) {
       const data = await res.json();
       setWeeklyDeadlines(data.weekly_deadlines);
       setChartBase64(data.deadlines_per_week_chart_base64);
-    } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.");
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "Something went wrong in fetchAnalysis. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiBaseUrl, events]);
 
   useEffect(() => {
     if (events && events.length > 0) {
       fetchAnalysis();
     }
-  }, [events, apiBaseUrl]);
-
+  }, [fetchAnalysis, events]);
   if (loading) {
     return (
       <section className="mt-10 bg-[#111111] p-6 rounded-2xl border border-neutral-800 shadow-lg">
@@ -96,7 +96,7 @@ export default function Analysis({ events, apiBaseUrl }: AnalysisProps) {
       <h2 className="text-3xl font-semibold mb-6 text-white">Weekly Deadlines Analysis</h2>
 
       {chartBase64 ? (
-        <img
+        <Image
           src={`data:image/png;base64,${chartBase64}`}
           alt="Bar chart showing deadlines per week"
           className="max-w-full h-auto mb-6 rounded animate-fade-in"
@@ -136,9 +136,8 @@ export default function Analysis({ events, apiBaseUrl }: AnalysisProps) {
             {weeklyDeadlines.map(({ week, deadline_count }, index) => (
               <tr
                 key={week}
-                className={`${
-                  index % 2 === 0 ? "bg-[#0e0e0e]" : "bg-[#1a1a1a]"
-                } hover:bg-neutral-800 transition focus:outline-none focus:ring-2 focus:ring-neutral-500`}
+                className={`${index % 2 === 0 ? "bg-[#0e0e0e]" : "bg-[#1a1a1a]"
+                  } hover:bg-neutral-800 transition focus:outline-none focus:ring-2 focus:ring-neutral-500`}
                 tabIndex={0}
                 role="row"
               >

@@ -26,7 +26,7 @@ export default function ResultPage() {
     };
 
     if (extractedEvents && extractedEvents.length > 0) regenerateICS();
-  }, [extractedEvents]);
+  }, [extractedEvents, API_BASE_URL]);
 
   useEffect(() => {
     const loadAndProcess = async () => {
@@ -75,7 +75,7 @@ export default function ResultPage() {
     };
 
     loadAndProcess();
-  }, [fileKey]);
+  }, [fileKey, API_BASE_URL]);
 
   if (loading) {
     return (
