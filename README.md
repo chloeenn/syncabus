@@ -1,6 +1,4 @@
-# 📅 Syncabus
-
-**From syllabus to calendar — in seconds.**
+# Syncabus
 
 Syncabus is a web app that helps students turn course syllabi (PDFs) into `.ics` calendar files.
 
